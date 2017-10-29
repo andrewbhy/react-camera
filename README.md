@@ -77,7 +77,7 @@ example : diplay captured image
 
   <div>
     <Camera onCapture={this.onCapture}>
-    <img ref={ img=>this.previewImg }>
+    <img ref={ img=>this.previewImg = img }>
   </div>
 
   }
