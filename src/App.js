@@ -30,6 +30,25 @@ class App extends Component {
       width : 1200,
       height: 800
     }
+
+    this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
+  }
+
+  componentDidMount() {
+    
+    window.addEventListener('resize', this.updateWindowDimensions);
+  }
+  componentWillMount(){
+    this.updateWindowDimensions();
+  }
+  componentWillUnmount(){
+
+    window.removeEventListener('resize', this.updateWindowDimensions);
+  }
+  updateWindowDimensions(){
+
+
+    this.setState({ width: window.innerWidth, height: window.innerHeight });
   }
   render() {
     return (
@@ -38,7 +57,7 @@ class App extends Component {
         <h1>react-camera</h1> 
         v {version}
         <div style={{display:"flex", justifyContent:"center"}}>
-          <Camera onCapture={onCapture}  emulation={false} scale={2} maxScale={5} style={{width:this.state.width,height:this.state.height,marginTop:20}}/>
+          <Camera onCapture={onCapture}  emulation={false} scale={2} maxScale={5} style={{width:this.state.width - 50,height:this.state.height,marginTop:20}}/>
         </div>
         <div>
             <strong>click on the video to "capture" a screenshot</strong>

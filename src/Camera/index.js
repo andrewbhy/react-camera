@@ -63,7 +63,13 @@ export default class Camera extends Component {
     componentDidMount() {
         this.init();
     }
-
+    componentWillReceiveProps(props){
+        if(this.video && this.video.videoHeight > 0){
+            let dimension = this.adjustAspectRatio(this.video.videoWidth,this.video.videoHeight,props.style.width)
+            this.setState(dimension)
+        }
+     
+    }
     componentWillUpdate() {
 
 
@@ -225,11 +231,16 @@ export default class Camera extends Component {
         return newScale;
     }
 
-    adjustAspectRatio(width, height) {
+    adjustAspectRatio(videoWidth, videoHeight,width) {
 
-        this.setState({ height: this.state.width * height / width })
-        this.canvas.width = width
-        this.canvas.height = height
+        let dimension = { height: width * videoHeight / videoWidth, width  }
+        
+        return dimension
+    }
+
+    setCanvasDimension(videoWidth, videoHeight,width){
+        this.canvas.width = videoWidth
+        this.canvas.height = videoHeight
     }
 
     setupEmulation() {
@@ -242,7 +253,9 @@ export default class Camera extends Component {
         }
         video.onloadedmetadata = (e) => {
             video.play();
-            this.adjustAspectRatio(video.videoWidth, video.videoHeight)
+            this.setCanvasDimension(video.videoWidth, video.videoHeight)
+            let dimension = this.adjustAspectRatio(video.videoWidth, video.videoHeight,this.state.width)
+            this.setState(dimension)
         }
 
 
@@ -282,7 +295,7 @@ export default class Camera extends Component {
     init() {
 
         let video = this.video;
-
+        let ctx = this;
         if (this.state.emulation) {
             this.setupEmulation();
         }
@@ -294,17 +307,19 @@ export default class Camera extends Component {
                     audio: false,
                     video: { facingMode: "environment", width: 1920, height: 1080 }
                 }).then(stream => {
-                    this.stream = stream;
-                    if ("srcObject" in this.video) {
-                        this.video.srcObject = stream
+                    ctx.stream = stream;
+                    if ("srcObject" in video) {
+                        video.srcObject = stream
                     }
                     else {
-                        this.video.src = window.URL.createObjectURL(stream)
+                        video.src = window.URL.createObjectURL(stream)
                     }
 
-                    this.video.onloadedmetadata = (e) => {
+                    video.onloadedmetadata = (e) => {
                         video.play();
-                        this.adjustAspectRatio(this.video.videoWidth, this.video.videoHeight)
+                        ctx.setCanvasDimension(video.videoWidth, video.videoHeight)
+                        let dimension = this.adjustAspectRatio(video.videoWidth, video.videoHeight,ctx.state.width)
+                        ctx.setState(dimension)
 
                     }
 
