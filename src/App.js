@@ -8,7 +8,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
 import Camera from './Camera'
-
+import {version} from '../package.json'
 
 let previewImg = null;
 
@@ -24,7 +24,8 @@ class App extends Component {
     return (
       <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}>
       <div className="App">
-        <h1>react-camera</h1>
+        <h1>react-camera</h1> 
+        v {version}
         <div style={{display:"flex", justifyContent:"center"}}>
           <Camera onCapture={onCapture} maxScale={5} style={{width:1200,height:600,marginTop:20}}/>
         </div>
