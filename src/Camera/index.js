@@ -1,10 +1,11 @@
-
+import throttle from "lodash/throttle"
 
 import React, { Component } from 'react'
 import Slider from 'material-ui/Slider';
 
 import Message from './message'
 import Devices from './devices'
+import Shutter from './shutter'
 
 const shutterSound = new Audio("./camera-shutter-click-01.wav")
 const MAX_SCALE = 10
@@ -28,9 +29,18 @@ export default class Camera extends Component {
 
         this.msgSpan = null;
         this.video = null;
-        this.state = { scale: this.validateScale(this.props.scale), showDevices: this.props.showDevices, devices: [], selectedDeviceId: null, width: this.props.style.width, height: this.props.style.height, emulation: this.props.emulation } // using react state to track ui state; should stay here even after introducing redux?
+        this.state = { 
+            scale: this.validateScale(this.props.scale), 
+            showDevices: this.props.showDevices, 
+            devices: [], 
+            selectedDeviceId: null, 
+            width: this.props.style.width, 
+            height: this.props.style.height, 
+            emulation: this.props.emulation ,
+            isCapturing : false
+        } // using react state to track ui state; should stay here even after introducing redux?
 
-        this._onCapture = this._onCapture.bind(this)
+        this._onCapture = throttle(this._onCapture.bind(this), 1000)
         this.zoomIn = this.zoomIn.bind(this)
         this.zoomOut = this.zoomOut.bind(this)
         this.zoomChange = this.zoomChange.bind(this)
@@ -41,8 +51,13 @@ export default class Camera extends Component {
 
     componentWillMount() {
 
-        navigator.mediaDevices.enumerateDevices()
-            .then(this.deviceReceived.bind(this)).catch(console.log);
+        try {
+            navigator.mediaDevices.enumerateDevices()
+                .then(this.deviceReceived.bind(this)).catch(console.log);
+        }
+        catch (ex) {
+            console.log(ex)
+        }
     }
 
     componentDidMount() {
@@ -75,8 +90,6 @@ export default class Camera extends Component {
         let sliderValue = (this.state.scale - MIN_SCALE) / (this.props.maxScale - MIN_SCALE)
         let sliderHeight = (this.state.height - 80)
 
-        console.log(sliderValue, this.state.scale)
-
         return (
             <div style={Object.assign({}, { position: "relative" }, this.props.style, { width: this.state.width, height: this.state.height })} >
 
@@ -98,9 +111,7 @@ export default class Camera extends Component {
                         <div style={{ display: "flex", justifyContent: "center", flexDirection: "column" }} >
                             {this.state.emulation && <Message msg="Emulation Mode" permanent={true} />}
                             <Message msg={Math.round(this.state.scale * 100) / 100 + "X"} />
-
                         </div>
-
                     </div>
                     <div style={{ display: "flex", width: "100%", justifyContent: "flex-end" }} >
                         <div className="camera-control" style={{ position: "relative", display: "flex", justifyContent: "center", flexDirection: "column", marginRight: 5 }}>
@@ -111,7 +122,9 @@ export default class Camera extends Component {
                     </div>
 
 
-
+                    <div style={{ position: "absolute", zIndex: 10, pointerEvents: "none" }}>
+                        <Shutter display={this.state.isCapturing} style={{ width: this.state.width, height: this.state.height }} />
+                    </div>
 
                 </div>
 
@@ -123,25 +136,43 @@ export default class Camera extends Component {
 
     _onCapture(e) {
 
+        let ctx = this;
+
+        //calculate image dimension based on scale
+
         let dx = (this.video.videoWidth / this.state.scale)
         let dy = (this.video.videoHeight / this.state.scale)
 
         let x1 = (this.video.videoWidth - dx) / 2;
         let y1 = (this.video.videoHeight - dy) / 2;
 
-        console.log(this.video.videoWidth, this.video.videoHeight, x1, y1, dx, dy)
-        //0, 0, img.width,    img.height,     // source rectangle
-        //0, 0, canvas.width, canvas.height
         this.canvas2dContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.canvas2dContext.drawImage(this.video, x1, y1, dx, dy, 0, 0, this.canvas.width, this.canvas.height)
 
-        let img = this.canvas.toDataURL('image/webp');
-        //calculate image dimension based on scale
+        let img = this.canvas.toDataURL('image/png');
 
-        shutterSound.play()
-        if (this.props.onCapture) {
-            this.props.onCapture(e, img)
-        }
+        this.setState({ isCapturing: true }, () => {
+
+
+            if (ctx.props.onCapture) {
+                ctx.props.onCapture(e, img)
+            }
+
+            shutterSound.play().then(() => {
+
+                this.setState({ isCapturing: false })
+
+            })
+
+        })
+
+
+
+
+
+
+
+
 
     }
 
@@ -211,11 +242,11 @@ export default class Camera extends Component {
             this.adjustAspectRatio(video.videoWidth, video.videoHeight)
         }
 
-      
+
 
         this.setState({ selectedDeviceId: 0, enulation: true })
         this.forceUpdate()
-      
+
     }
 
     deviceReceived(devices) {

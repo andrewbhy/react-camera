@@ -48,6 +48,17 @@ class App extends Component {
           <img style={{}} ref={ img => previewImg = img } />
         </div>
 
+        <div>
+          <h2>Debug</h2>
+          <div> navigator.mediaDevices.getUserMedia ( recommended ): { navigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia  ? "true":"false"}</div>
+          <div> navigator.getUserMedia (deprecated ) : { navigator && navigator.getUserMedia  ? "true":"false"}</div>
+          <div> navigator.webkitGetUserMedia ( experimental ver ): { navigator && navigator.webkitGetUserMedia  ? "true":"false"}</div>
+
+          <div> navigator.mediaDevices.enumerateDevice : { navigator && navigator.mediaDevices && navigator.mediaDevices.enumerateDevice  ? "true":"false"}</div>
+          
+          <div>MediaStreamTrack : {MediaStreamTrack ? "true" : "false" }</div>
+        </div>
+
       </div>
       </MuiThemeProvider>
     );

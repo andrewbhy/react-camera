@@ -61,8 +61,9 @@ Also, component will automatically fallback to emulation mode when initializatio
 ## onCapture : ?Function
 
 ```javascript
-function onCapture( e : Event, img : Image ){
+function onCapture( img : string ){
 
+  //img is dataurl string in png format
 
 }
 ```

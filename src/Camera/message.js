@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import debounce from 'lodash/debounce'
 
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group'; 
 import "./message.css"
@@ -9,10 +10,7 @@ export default class Message extends Component{
 
     constructor(props){
         super(props)
-
         this.state = { display : this.props.display }
-
-       
     }
 
     componentDidUpdate( ) {
@@ -20,16 +18,19 @@ export default class Message extends Component{
 
         if( !this.props.permanent){
 
-            setTimeout(function() {
+            debounce(()=>{
+                
                 ctx.setState({display:false})
-            }, 100);
+            },500)();
 
         }
     }
    
-    componentWillUpdate() {
-
-        this.state.display=true;
+    componentWillUpdate(state) {
+        if( state.permanent == true || ( this.props.msg ||"") !== state.msg ){
+            this.state.display=true;
+        }
+           
     }
 
 

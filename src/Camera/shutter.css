@@ -1,0 +1,29 @@
+.shutter-root {
+    pointer-events: none;
+}
+.shutter {
+    background-color: black;
+}
+/*
+.shutter-transition-enter {
+    opacity: 0.01;
+
+}
+
+.shutter-transition-enter.shutter-transition-enter-active {
+    opacity: 1;
+    background-color: red;
+    transition: 500ms;
+}
+
+.shutter-transition-leave {
+    opacity: 1;
+
+}
+
+.shutter-transition-leave.shutter-transition-leave-active {
+    opacity: 0.01;
+
+    transition: 500ms;
+}
+*/
