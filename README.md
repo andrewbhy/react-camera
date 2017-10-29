@@ -91,7 +91,7 @@ example : diplay captured image
     }
   }
 ```
-# maxScale 
+# maxScale : number
 
 maximum zoom level.  default : 10
 
@@ -100,7 +100,7 @@ maximum zoom level.  default : 10
 
 ```
 
-# scale
+# scale : number
 
 default zoom level.  default : 1
 ```javascript
