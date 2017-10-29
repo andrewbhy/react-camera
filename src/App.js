@@ -24,12 +24,12 @@ class App extends Component {
     return (
       <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}>
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
+        <h1>react-camera</h1>
         <div style={{display:"flex", justifyContent:"center"}}>
           <Camera onCapture={onCapture} maxScale={5} style={{width:1200,height:600,marginTop:20}}/>
+        </div>
+        <div>
+            <strong>click on the video to "capture" a screenshot</strong>
         </div>
         <div>
           <h2>Captured Image </h2> 
