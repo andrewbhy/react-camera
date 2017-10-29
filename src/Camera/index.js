@@ -4,6 +4,7 @@ import React, { Component } from 'react'
 import Slider from 'material-ui/Slider';
 
 import Message from './message'
+import Devices from './devices'
 
 const shutterSound = new Audio("./camera-shutter-click-01.wav")
 const MAX_SCALE = 10
@@ -27,7 +28,7 @@ export default class Camera extends Component {
 
         this.msgSpan = null;
         this.video = null;
-        this.state = { scale: this.validateScale(this.props.scale), width: this.props.style.width, height: this.props.style.height, emulation: this.props.emulation } // using react state to track ui state; should stay here even after introducing redux?
+        this.state = { scale: this.validateScale(this.props.scale), showDevices: this.props.showDevices, devices: [], selectedDeviceId: null, width: this.props.style.width, height: this.props.style.height, emulation: this.props.emulation } // using react state to track ui state; should stay here even after introducing redux?
 
         this._onCapture = this._onCapture.bind(this)
         this.zoomIn = this.zoomIn.bind(this)
@@ -37,79 +38,20 @@ export default class Camera extends Component {
 
     }
 
-    validateScale(scale){
-        let newScale = MIN_SCALE;
 
-        if(scale){
-            if(scale < MIN_SCALE){
-                newScale = MIN_SCALE;
-            }
-            else if(scale > this.props.maxScale){
-                newScale = this.props.maxScale
-            }
-            else{
-                newScale = scale;
-            }
-        }
+    componentWillMount() {
 
-        return newScale;
-    }
-
-    adjustAspectRatio(width, height) {
-        this.setState({ height: this.state.width * height / width })
-        this.canvas.width = width
-        this.canvas.height = height
-    }
-
-    setupEmulation(){
-        let video = this.video;
-        video.src = "SampleVideo_1280x720_1mb.mp4"
-        video.muted = true
-        if (typeof video.loop == 'boolean') {
-             // loop supported
-            video.loop = true;
-        }
-        video.onloadedmetadata = (e) => {
-            video.play();
-            this.adjustAspectRatio(video.videoWidth, video.videoHeight)
-        }
-    }
-    init() {
-
-        let video = this.video;
-
-        if (this.state.emulation) {
-           this.setupEmulation();
-        }
-        else {
-
-            navigator.mediaDevices.getUserMedia({
-                audio: false,
-                video: { facingMode: "environment", width: 1920, height: 1080 }
-            }).then(stream => {
-                this.stream = stream;
-                if ("srcObject" in this.video) {
-                    this.video.srcObject = stream
-                }
-                else {
-                    this.video.src = window.URL.createObjectURL(stream)
-                }
-              
-                this.video.onloadedmetadata = (e) => {
-                    video.play();
-                    this.adjustAspectRatio(this.video.videoWidth, this.video.videoHeight)
-                }
-
-            }).catch(err => {
-                this.setupEmulation();
-            })
-
-        }
-
+        navigator.mediaDevices.enumerateDevices()
+            .then(this.deviceReceived.bind(this)).catch(console.log);
     }
 
     componentDidMount() {
         this.init();
+    }
+
+    componentWillUpdate() {
+
+
     }
     render() {
 
@@ -133,6 +75,8 @@ export default class Camera extends Component {
         let sliderValue = (this.state.scale - MIN_SCALE) / (this.props.maxScale - MIN_SCALE)
         let sliderHeight = (this.state.height - 80)
 
+        console.log(sliderValue, this.state.scale)
+
         return (
             <div style={Object.assign({}, { position: "relative" }, this.props.style, { width: this.state.width, height: this.state.height })} >
 
@@ -144,11 +88,17 @@ export default class Camera extends Component {
                             onClick={this._onCapture}
                         />
                     </div>
+                    <div style={{ position: "relative" }}>
+                        {
+                            this.state.showDevices && <Devices devices={this.state.devices} style={{ margin: 20 }} />
+                        }
+                    </div>
+
                     <div style={{ pointerEvents: "none", display: "flex", flexWrap: "wrap", width: "100%", height: "100%", justifyContent: "center", position: "absolute" }}>
                         <div style={{ display: "flex", justifyContent: "center", flexDirection: "column" }} >
-                            { this.state.emulation && <Message msg="Emulation Mode" permanent={true}/>}
+                            {this.state.emulation && <Message msg="Emulation Mode" permanent={true} />}
                             <Message msg={Math.round(this.state.scale * 100) / 100 + "X"} />
-                          
+
                         </div>
 
                     </div>
@@ -202,7 +152,7 @@ export default class Camera extends Component {
         if (newScale > this.props.maxScale) {
             newScale = this.props.maxScale;
         }
-        this.setState({ scale: this.validateScale( newScale )})
+        this.setState({ scale: this.validateScale(newScale) })
 
     }
     zoomOut() {
@@ -219,8 +169,126 @@ export default class Camera extends Component {
 
         let newScale = MIN_SCALE + (newValue) * (this.props.maxScale - MIN_SCALE)
 
-        this.setState({ scale: this.validateScale (newScale) })
+        this.setState({ scale: this.validateScale(newScale) })
     }
+
+
+    validateScale(scale) {
+        let newScale = MIN_SCALE;
+
+        if (scale) {
+            if (scale < MIN_SCALE) {
+                newScale = MIN_SCALE;
+            }
+            else if (scale > this.props.maxScale) {
+                newScale = this.props.maxScale
+            }
+            else {
+                newScale = scale;
+            }
+        }
+
+        return newScale;
+    }
+
+    adjustAspectRatio(width, height) {
+
+        this.setState({ height: this.state.width * height / width })
+        this.canvas.width = width
+        this.canvas.height = height
+    }
+
+    setupEmulation() {
+        let video = this.video;
+        video.src = "SampleVideo_1280x720_1mb.mp4"
+        video.muted = true
+        if (typeof video.loop == 'boolean') {
+            // loop supported
+            video.loop = true;
+        }
+        video.onloadedmetadata = (e) => {
+            video.play();
+            this.adjustAspectRatio(video.videoWidth, video.videoHeight)
+        }
+
+      
+
+        this.setState({ selectedDeviceId: 0, enulation: true })
+        this.forceUpdate()
+      
+    }
+
+    deviceReceived(devices) {
+
+        let videoDevices = devices.filter((item) => {
+            return item.kind === "videoinput"
+        })
+
+        videoDevices.push({
+            deviceId: 0,
+            label: "Emulation"
+        })
+
+        this.setState({ devices: videoDevices })
+
+        // for (let i = 0; i < videoDevices.length; ++i) {
+        //     let deviceInfo = videoDevices[i];
+
+
+        // }
+
+    }
+
+    changeDevice(deviceId) {
+
+        debugger
+    }
+
+
+    init() {
+
+        let video = this.video;
+
+        if (this.state.emulation) {
+            this.setupEmulation();
+        }
+        else {
+
+
+            try {
+                navigator.mediaDevices.getUserMedia({
+                    audio: false,
+                    video: { facingMode: "environment", width: 1920, height: 1080 }
+                }).then(stream => {
+                    this.stream = stream;
+                    if ("srcObject" in this.video) {
+                        this.video.srcObject = stream
+                    }
+                    else {
+                        this.video.src = window.URL.createObjectURL(stream)
+                    }
+
+                    this.video.onloadedmetadata = (e) => {
+                        video.play();
+                        this.adjustAspectRatio(this.video.videoWidth, this.video.videoHeight)
+
+                    }
+
+                }).catch(err => {
+                    debugger
+                    this.setupEmulation();
+                })
+            }
+            catch (ex) {
+                debugger
+                this.setupEmulation();
+            }
+
+
+        }
+
+    }
+
 }
 
 //https://toddmotto.com/react-create-class-versus-component/
@@ -229,6 +297,7 @@ Camera.defaultProps = {
     scale: 1,
 
     emulation: false,
+    showDevices: true,
 
     maxScale: MAX_SCALE,
 

@@ -19,7 +19,18 @@ const onCapture = (e,img) => {
   }
 }
 
+
+
 class App extends Component {
+
+  constructor(props){
+    super(props)
+    this.state = {
+
+      width : 1200,
+      height: 800
+    }
+  }
   render() {
     return (
       <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}>
@@ -27,7 +38,7 @@ class App extends Component {
         <h1>react-camera</h1> 
         v {version}
         <div style={{display:"flex", justifyContent:"center"}}>
-          <Camera onCapture={onCapture}  emulation={false} scale={2} maxScale={5} style={{width:1200,height:600,marginTop:20}}/>
+          <Camera onCapture={onCapture}  emulation={false} scale={2} maxScale={5} style={{width:this.state.width,height:this.state.height,marginTop:20}}/>
         </div>
         <div>
             <strong>click on the video to "capture" a screenshot</strong>
@@ -36,6 +47,7 @@ class App extends Component {
           <h2>Captured Image </h2> 
           <img style={{}} ref={ img => previewImg = img } />
         </div>
+
       </div>
       </MuiThemeProvider>
     );
