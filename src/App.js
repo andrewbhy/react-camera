@@ -57,6 +57,9 @@ class App extends Component {
           <div> navigator.mediaDevices.enumerateDevice : { navigator && navigator.mediaDevices && navigator.mediaDevices.enumerateDevice  ? "true":"false"}</div>
           
           <div>MediaStreamTrack : {MediaStreamTrack ? "true" : "false" }</div>
+
+          <div>navigator.vibrate : {navigator.vibrate ? "true":"false"} </div>
+
         </div>
 
       </div>

@@ -158,6 +158,9 @@ export default class Camera extends Component {
                 ctx.props.onCapture(e, img)
             }
 
+            if("vibrate" in navigator){
+                navigator.vibrate(100)
+            }
             shutterSound.play().then(() => {
 
                 this.setState({ isCapturing: false })
