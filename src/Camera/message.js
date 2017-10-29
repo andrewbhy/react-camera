@@ -10,16 +10,21 @@ export default class Message extends Component{
     constructor(props){
         super(props)
 
-        this.state = { display : false }
+        this.state = { display : this.props.display }
 
        
     }
 
     componentDidUpdate( ) {
         let ctx = this;
-        setTimeout(function() {
-            ctx.setState({display:false})
-        }, 1000);
+
+        if( !this.props.permanent){
+
+            setTimeout(function() {
+                ctx.setState({display:false})
+            }, 100);
+
+        }
     }
    
     componentWillUpdate() {
@@ -53,5 +58,7 @@ export default class Message extends Component{
 
 
 Message.defaultProps = {
-    msg : "hebheheh"
+    msg : "hebheheh",
+    display : false,
+    permanent : false
 }

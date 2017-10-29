@@ -27,7 +27,7 @@ class App extends Component {
         <h1>react-camera</h1> 
         v {version}
         <div style={{display:"flex", justifyContent:"center"}}>
-          <Camera onCapture={onCapture} maxScale={5} style={{width:1200,height:600,marginTop:20}}/>
+          <Camera onCapture={onCapture}  emulation={false} scale={2} maxScale={5} style={{width:1200,height:600,marginTop:20}}/>
         </div>
         <div>
             <strong>click on the video to "capture" a screenshot</strong>

@@ -27,7 +27,7 @@ export default class Camera extends Component {
 
         this.msgSpan = null;
         this.video = null;
-        this.state = { scale: 1, width: this.props.style.width, height: this.props.style.height } // using react state to track ui state; should stay here even after introducing redux?
+        this.state = { scale: this.validateScale(this.props.scale), width: this.props.style.width, height: this.props.style.height, emulation: this.props.emulation } // using react state to track ui state; should stay here even after introducing redux?
 
         this._onCapture = this._onCapture.bind(this)
         this.zoomIn = this.zoomIn.bind(this)
@@ -37,33 +37,74 @@ export default class Camera extends Component {
 
     }
 
+    validateScale(scale){
+        let newScale = MIN_SCALE;
+
+        if(scale){
+            if(scale < MIN_SCALE){
+                newScale = MIN_SCALE;
+            }
+            else if(scale > this.props.maxScale){
+                newScale = this.props.maxScale
+            }
+            else{
+                newScale = scale;
+            }
+        }
+
+        return newScale;
+    }
+
     adjustAspectRatio(width, height) {
         this.setState({ height: this.state.width * height / width })
         this.canvas.width = width
         this.canvas.height = height
     }
+
+    setupEmulation(){
+        let video = this.video;
+        video.src = "SampleVideo_1280x720_1mb.mp4"
+        video.muted = true
+        if (typeof video.loop == 'boolean') {
+             // loop supported
+            video.loop = true;
+        }
+        video.onloadedmetadata = (e) => {
+            video.play();
+            this.adjustAspectRatio(video.videoWidth, video.videoHeight)
+        }
+    }
     init() {
 
-        navigator.mediaDevices.getUserMedia({
-            audio: false,
-            video: { facingMode: "environment", width: 1920, height: 1080 }
-        }).then(stream => {
-            this.stream = stream;
-            if ("srcObject" in this.video) {
-                this.video.srcObject = stream
-            }
-            else {
-                this.video.src = window.URL.createObjectURL(stream)
-            }
-            let video = this.video
-            this.video.onloadedmetadata = (e) => {
-                video.play();
-                this.adjustAspectRatio(this.video.videoWidth, this.video.videoHeight)
-            }
+        let video = this.video;
 
-        }).catch(err => {
-            debugger
-        })
+        if (this.state.emulation) {
+           this.setupEmulation();
+        }
+        else {
+
+            navigator.mediaDevices.getUserMedia({
+                audio: false,
+                video: { facingMode: "environment", width: 1920, height: 1080 }
+            }).then(stream => {
+                this.stream = stream;
+                if ("srcObject" in this.video) {
+                    this.video.srcObject = stream
+                }
+                else {
+                    this.video.src = window.URL.createObjectURL(stream)
+                }
+              
+                this.video.onloadedmetadata = (e) => {
+                    video.play();
+                    this.adjustAspectRatio(this.video.videoWidth, this.video.videoHeight)
+                }
+
+            }).catch(err => {
+                this.setupEmulation();
+            })
+
+        }
 
     }
 
@@ -103,11 +144,13 @@ export default class Camera extends Component {
                             onClick={this._onCapture}
                         />
                     </div>
-                    <div style={{ pointerEvents:"none", display: "flex",flexWrap:"wrap", width:"100%",height:"100%",justifyContent: "center", position:"absolute" }}>
-                        <div style={{display:"flex",justifyContent:"center",flexDirection:"column"}} >
-                           <Message msg={ Math.round(this.state.scale*100)/100 + "X"}/>
+                    <div style={{ pointerEvents: "none", display: "flex", flexWrap: "wrap", width: "100%", height: "100%", justifyContent: "center", position: "absolute" }}>
+                        <div style={{ display: "flex", justifyContent: "center", flexDirection: "column" }} >
+                            { this.state.emulation && <Message msg="Emulation Mode" permanent={true}/>}
+                            <Message msg={Math.round(this.state.scale * 100) / 100 + "X"} />
+                          
                         </div>
-                       
+
                     </div>
                     <div style={{ display: "flex", width: "100%", justifyContent: "flex-end" }} >
                         <div className="camera-control" style={{ position: "relative", display: "flex", justifyContent: "center", flexDirection: "column", marginRight: 5 }}>
@@ -116,13 +159,13 @@ export default class Camera extends Component {
                             <button onClick={this.zoomOut}>-</button>
                         </div>
                     </div>
-                 
-                   
+
+
 
 
                 </div>
 
-              
+
             </div>
         )
     }
@@ -152,14 +195,14 @@ export default class Camera extends Component {
 
     }
 
-   
+
     zoomIn() {
         let currentScale = this.state.scale
         let newScale = currentScale + ZOOM_INCREMENT;
         if (newScale > this.props.maxScale) {
             newScale = this.props.maxScale;
         }
-        this.setState({ scale: newScale })
+        this.setState({ scale: this.validateScale( newScale )})
 
     }
     zoomOut() {
@@ -169,14 +212,14 @@ export default class Camera extends Component {
         if (newScale < MIN_SCALE) {
             newScale = MIN_SCALE;
         }
-        this.setState({ scale: newScale })
+        this.setState({ scale: this.validateScale(newScale) })
     }
 
     zoomChange(e, newValue) {
 
         let newScale = MIN_SCALE + (newValue) * (this.props.maxScale - MIN_SCALE)
 
-        this.setState({ scale: newScale })
+        this.setState({ scale: this.validateScale (newScale) })
     }
 }
 
@@ -184,6 +227,8 @@ export default class Camera extends Component {
 Camera.defaultProps = {
 
     scale: 1,
+
+    emulation: false,
 
     maxScale: MAX_SCALE,
 
