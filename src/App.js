@@ -28,10 +28,11 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to React</h1>
         </header>
-        <div style={{display:"flex", justifyContent:"center" ,alignItems:"center" ,height:1200}}>
-          <Camera onCapture={onCapture} width={800} height={600}/>
+        <div style={{display:"flex", justifyContent:"center"}}>
+          <Camera onCapture={onCapture} maxScale={5} style={{width:1200,height:600,marginTop:20}}/>
         </div>
         <div>
+          <h2>Captured Image </h2> 
           <img style={{}} ref={ img => previewImg = img } />
         </div>
       </div>
