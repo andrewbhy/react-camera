@@ -2,9 +2,10 @@
 
 import React, { Component } from 'react'
 import Slider from 'material-ui/Slider';
-import Message from './message'
-import "./camera.css"
 
+import Message from './message'
+
+const shutterSound = new Audio("./camera-shutter-click-01.wav")
 const MAX_SCALE = 10
 const MIN_SCALE = 1
 const ZOOM_INCREMENT = .25
@@ -104,8 +105,7 @@ export default class Camera extends Component {
                     </div>
                     <div style={{ pointerEvents:"none", display: "flex",flexWrap:"wrap", width:"100%",height:"100%",justifyContent: "center", position:"absolute" }}>
                         <div style={{display:"flex",justifyContent:"center",flexDirection:"column"}} >
-
-                           <Message msg={this.state.scale}/>
+                           <Message msg={ Math.round(this.state.scale*100)/100 + "X"}/>
                         </div>
                        
                     </div>
@@ -145,6 +145,7 @@ export default class Camera extends Component {
         let img = this.canvas.toDataURL('image/webp');
         //calculate image dimension based on scale
 
+        shutterSound.play()
         if (this.props.onCapture) {
             this.props.onCapture(e, img)
         }

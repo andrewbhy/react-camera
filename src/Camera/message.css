@@ -1,0 +1,22 @@
+.msg-enter {
+  opacity: 0.01;
+}
+
+.msg-enter.msg-enter-active {
+  opacity: 1;
+  transition: opacity 500ms ease-in;
+}
+
+.msg-leave {
+  opacity: 1;
+}
+
+.msg-leave.msg-leave-active {
+  opacity: 0.01;
+  transition: opacity 300ms ease-in;
+}
+
+.msgSpan {
+
+  color:white
+}
