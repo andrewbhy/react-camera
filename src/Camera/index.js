@@ -337,6 +337,8 @@ export default class Camera extends Component {
             //emulation?
 
             if(video.srcObject){
+
+                video.srcObject.getVideoTracks().forEach(track=>track.stop())
                 video.srcObject = null;
             }
            
