@@ -16,7 +16,7 @@ use the zoom controls on the right side of the component ( buttons and slider ).
 
 # Capture photo
 
-click on the video
+click on the white circle button on the right side
 
 
 

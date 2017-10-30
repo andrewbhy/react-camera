@@ -30,12 +30,10 @@ class App extends Component {
       width : 1200,
       height: 800
     }
-
     this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
   }
 
   componentDidMount() {
-    
     window.addEventListener('resize', this.updateWindowDimensions);
   }
   componentWillMount(){

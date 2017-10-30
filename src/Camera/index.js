@@ -6,11 +6,17 @@ import Slider from 'material-ui/Slider';
 import Message from './message'
 import Devices from './devices'
 import Shutter from './shutter'
+import CaptureButton from './captureButton'
 
 const shutterSound = new Audio("./camera-shutter-click-01.wav")
 const MAX_SCALE = 10
 const MIN_SCALE = 1
 const ZOOM_INCREMENT = .25
+
+const cameraControlStyle = {
+    width : 150,
+    backgroundColor:"black"
+}
 
 
 
@@ -34,11 +40,13 @@ export default class Camera extends Component {
             showDevices: this.props.showDevices,
             devices: [],
             selectedDeviceId: null,
-            width: this.props.style.width,
+            width: this.props.style.width - cameraControlStyle.width,
             height: this.props.style.height,
             emulation: this.props.emulation,
             emulationSrc : this.props.emulationSrc,
             isCapturing: false
+
+
         } // using react state to track ui state; should stay here even after introducing redux?
 
         this._onCapture = throttle(this._onCapture.bind(this), 1000)
@@ -101,43 +109,51 @@ export default class Camera extends Component {
         let sliderHeight = (this.state.height - 80)
 
         return (
-            <div style={Object.assign({}, { position: "relative" }, this.props.style, { width: this.state.width, height: this.state.height })} >
+            <div style={Object.assign({}, { position: "relative" }, this.props.style, { width: this.state.width + 200, height: this.state.height })} >
 
-                <div className="camera-container" style={cameraStyle}>
+                <div style={{position:"relative",display:"flex"}}>
+                    <div className="camera-container" style={cameraStyle}>
 
-                    <div style={{ display: "flex", justifyContent: "center" }} >
-                        <video style={videoStyle}
-                            ref={vid => { this.video = vid }}
-                            onClick={this._onCapture}
-                        />
-                    </div>
-                    <div style={{ position: "relative" }}>
-                        {
-                            this.state.showDevices && <Devices devices={this.state.devices} style={{ margin: 20 }} onClick={this.changeDevice} />
-                        }
-                    </div>
-
-                    <div style={{ pointerEvents: "none", display: "flex", flexWrap: "wrap", width: "100%", height: "100%", justifyContent: "center", position: "absolute" }}>
-                        <div style={{ display: "flex", justifyContent: "center", flexDirection: "column" }} >
-                            {this.state.emulation && <Message msg="Emulation Mode" permanent={true} />}
-                            <Message msg={Math.round(this.state.scale * 100) / 100 + "X"} />
+                        <div style={{ display: "flex", justifyContent: "center" }} >
+                            <video style={videoStyle}
+                                ref={vid => { this.video = vid }}
+                                
+                            />
                         </div>
-                    </div>
-                    <div style={{ display: "flex", width: "100%", justifyContent: "flex-end" }} >
-                        <div className="camera-control" style={{ position: "relative", display: "flex", justifyContent: "center", flexDirection: "column", marginRight: 5 }}>
-                            <button onClick={this.zoomIn}>+</button>
-                            <Slider style={{ height: sliderHeight, marginTop: 10, marginBottom: 10, display: "flex", justifyContent: "center" }} sliderStyle={{ marginTop: 0, marginBottom: 0 }} axis="y" value={sliderValue} defaultValue={sliderValue} onChange={this.zoomChange} />
-                            <button onClick={this.zoomOut}>-</button>
+                        <div style={{ position: "relative" }}>
+                            {
+                                this.state.showDevices && <Devices devices={this.state.devices} style={{ margin: 20 }} onClick={this.changeDevice} />
+                            }
                         </div>
+
+                        <div style={{ pointerEvents: "none", display: "flex", flexWrap: "wrap", width: "100%", height: "100%", justifyContent: "center", position: "absolute" }}>
+                            <div style={{ display: "flex", justifyContent: "center", flexDirection: "column" }} >
+                                {this.state.emulation && <Message msg="Emulation Mode" permanent={true} />}
+                                <Message msg={Math.round(this.state.scale * 100) / 100 + "X"} />
+                            </div>
+                        </div>
+            
+
+
+                        <div style={{ position: "absolute", zIndex: 10, pointerEvents: "none" }}>
+                            <Shutter display={this.state.isCapturing} style={{ width: this.state.width, height: this.state.height }} />
+                        </div>
+
                     </div>
 
-
-                    <div style={{ position: "absolute", zIndex: 10, pointerEvents: "none" }}>
-                        <Shutter display={this.state.isCapturing} style={{ width: this.state.width, height: this.state.height }} />
+                    <div style={ Object.assign({},cameraControlStyle,{ position:"relative", display: "flex",height:this.state.height, justifyContent: "flex-end" })} >
+                            <div style={{display:"flex", flexDirection:"column", position:"relative",marginRight:30,justifyContent:"center"}}>
+                                <CaptureButton onClick={this._onCapture}/>
+                            </div>
+                            <div style={{ display:"flex", height:"100%",position:"relative", justifyContent: "flex-end" }}>
+                                <div className="zoom-control" style={{ width:20,position: "relative", display: "flex", justifyContent: "center", flexDirection: "column", marginRight: 5 }}>
+                                    <button onClick={this.zoomIn}>+</button>
+                                    <Slider style={{ height: sliderHeight, marginTop: 10, marginBottom: 10, display: "flex", justifyContent: "center" }} sliderStyle={{ marginTop: 0, marginBottom: 0 }} axis="y" value={sliderValue} defaultValue={sliderValue} onChange={this.zoomChange} />
+                                    <button onClick={this.zoomOut}>-</button>
+                                </div>
+                            </div>
                     </div>
-
                 </div>
-
 
             </div>
         )
@@ -401,9 +417,9 @@ export default class Camera extends Component {
 
         let constraints = {
             audio: false,
-            video: { facingMode: "environment", width: 1920, height: 1080 }
+            video: { width: 1920, height: 1080 },
+            facingMode: "environment"
         }
-
        
         this.getUserMedia(constraints)
       
