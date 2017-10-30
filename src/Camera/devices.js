@@ -17,16 +17,16 @@ export default class Devices extends Component{
     }
 
     render(){
-        
         return (
         
             <div style={ Object.assign ({},{display:"flex", flexDirection:"row",justifyContent:"flex-start"},this.props.style)} >
                 {
+                    
                     this.props.devices.map(function(device){
                         
                         let name = device.label.replace(/\([0-9:a-zA-Z]*\)/,"")
-
-                        return <div title={device.label + " : " + device.deviceId}key={device.deviceId} className={device.facingMode}style={{color:'white' ,margin:10,padding:10,border:"solid" ,borderRadius:10}}>{name||"unknown device"}</div>;
+                        
+                        return <div title={device.label + " : " + device.deviceId}key={device.id||device.deviceId} className={device.facingMode}style={{color:'white' ,margin:10,padding:10,border:"solid" ,borderRadius:10}}>{name||"unknown device"}</div>;
                     })
                 }
             </div>

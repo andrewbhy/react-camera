@@ -29,15 +29,15 @@ export default class Camera extends Component {
 
         this.msgSpan = null;
         this.video = null;
-        this.state = { 
-            scale: this.validateScale(this.props.scale), 
-            showDevices: this.props.showDevices, 
-            devices: [], 
-            selectedDeviceId: null, 
-            width: this.props.style.width, 
-            height: this.props.style.height, 
-            emulation: this.props.emulation ,
-            isCapturing : false
+        this.state = {
+            scale: this.validateScale(this.props.scale),
+            showDevices: this.props.showDevices,
+            devices: [],
+            selectedDeviceId: null,
+            width: this.props.style.width,
+            height: this.props.style.height,
+            emulation: this.props.emulation,
+            isCapturing: false
         } // using react state to track ui state; should stay here even after introducing redux?
 
         this._onCapture = throttle(this._onCapture.bind(this), 1000)
@@ -51,24 +51,24 @@ export default class Camera extends Component {
 
     componentWillMount() {
 
-        try {
-            navigator.mediaDevices.enumerateDevices()
-                .then(this.deviceReceived.bind(this)).catch(console.log);
-        }
-        catch (ex) {
-            console.log(ex)
-        }
+        // try {
+        //     navigator.mediaDevices.enumerateDevices()
+        //         .then(this.deviceReceived.bind(this)).catch(console.log);
+        // }
+        // catch (ex) {
+        //     console.log(ex)
+        // }
     }
 
     componentDidMount() {
         this.init();
     }
-    componentWillReceiveProps(props){
-        if(this.video && this.video.videoHeight > 0){
-            let dimension = this.adjustAspectRatio(this.video.videoWidth,this.video.videoHeight,props.style.width)
+    componentWillReceiveProps(props) {
+        if (this.video && this.video.videoHeight > 0) {
+            let dimension = this.adjustAspectRatio(this.video.videoWidth, this.video.videoHeight, props.style.width)
             this.setState(dimension)
         }
-     
+
     }
     componentWillUpdate() {
 
@@ -164,13 +164,11 @@ export default class Camera extends Component {
                 ctx.props.onCapture(e, img)
             }
 
-            if("vibrate" in navigator){
+            if ("vibrate" in navigator) {
                 navigator.vibrate(100)
             }
             shutterSound.play().then(() => {
-
                 this.setState({ isCapturing: false })
-
             })
 
         })
@@ -231,14 +229,12 @@ export default class Camera extends Component {
         return newScale;
     }
 
-    adjustAspectRatio(videoWidth, videoHeight,width) {
-
-        let dimension = { height: width * videoHeight / videoWidth, width  }
-        
+    adjustAspectRatio(videoWidth, videoHeight, width) {
+        let dimension = { height: width * videoHeight / videoWidth, width }
         return dimension
     }
 
-    setCanvasDimension(videoWidth, videoHeight,width){
+    setCanvasDimension(videoWidth, videoHeight, width) {
         this.canvas.width = videoWidth
         this.canvas.height = videoHeight
     }
@@ -254,46 +250,131 @@ export default class Camera extends Component {
         video.onloadedmetadata = (e) => {
             video.play();
             this.setCanvasDimension(video.videoWidth, video.videoHeight)
-            let dimension = this.adjustAspectRatio(video.videoWidth, video.videoHeight,this.state.width)
+            let dimension = this.adjustAspectRatio(video.videoWidth, video.videoHeight, this.state.width)
             this.setState(dimension)
         }
-
-
 
         this.setState({ selectedDeviceId: 0, enulation: true })
         this.forceUpdate()
 
     }
 
-    deviceReceived(devices) {
-
-        let videoDevices = devices.filter((item) => {
-            return item.kind === "videoinput"
-        })
-
-        videoDevices.push({
-            deviceId: 0,
-            label: "Emulation"
-        })
-
-        this.setState({ devices: videoDevices })
-
-        // for (let i = 0; i < videoDevices.length; ++i) {
-        //     let deviceInfo = videoDevices[i];
-
-
-        // }
-
-    }
 
     changeDevice(deviceId) {
 
         debugger
     }
 
+    getEmulationDeviceInfo (){
+
+        return {
+            deviceId: 1,
+            label: "emulation",
+            kind : "emulation",
+            emulation : true,
+            selected : false
+        }
+    }
+
+    getUserMediaEmulation() {
+
+        return Promise.resolve(false);
+
+    }
+
+    handleDeviceReceived(stream) {
+        let videoTracks = null;
+        let video = this.video;
+        let ctx = this;
+
+        if(stream && stream.getVideoTracks){
+            videoTracks = stream.getVideoTracks();
+        }
+        
+        if( stream instanceof MediaStream){
+            this.video.srcObject = stream
+        }
+        else{
+            //emulation?
+            video.src = "SampleVideo_1280x720_1mb.mp4"
+            video.muted = true
+            if (typeof video.loop == 'boolean') {
+                // loop supported
+                video.loop = true;
+            }
+        }
+
+        video.onloadedmetadata = (e) => {
+            video.play();
+            ctx.setCanvasDimension(video.videoWidth, video.videoHeight)
+            let dimension = this.adjustAspectRatio(video.videoWidth, video.videoHeight,ctx.state.width)
+            ctx.setState(dimension)
+        }
+        
+        video.onactivate = (e) => {
+            console.log("video actived", e)
+        }
+        video.onabort = (e) => {
+            console.log("video aborted", e)
+        }
+        stream.oninactive = e => {
+            console.log('Stream inactive',e);
+        };
+        stream.onactive = (e)=> {
+            console.log("Stream active", e)
+        }
+
+        this.deviceReceived(videoTracks) //update device list
+    }
+
+
+    deviceReceived(devices) {
+
+        let deviceList = devices || []
+
+        if(!deviceList.find(item=>{item.kind=="emulation"}) ) {
+            deviceList.push(this.getEmulationDeviceInfo())
+        }
+
+        this.setState({ devices: deviceList })
+    }
+    getDevices() {
+
+        try {
+            let getUserMedia = null;
+            let ctx = null;
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                getUserMedia = navigator.mediaDevices.getUserMedia;
+                ctx = navigator.mediaDevices;
+            }
+            else if (navigator.getUserMedia) {
+                getUserMedia = navigator.getUserMedia
+                ctx = navigator;
+            }
+            else if (navigator.webkitGetUserMedia) {
+                getUserMedia = navigator.webkitGetUserMedia
+                ctx = navigator
+            }
+            else {
+                getUserMedia = this.getUserMediaEmulation;
+                ctx = this
+            }
+            //manually set the context to wherever the function belongs to, otherwise will get illegal invcation error
+            getUserMedia.call(ctx, {
+                audio: false,
+                video: { facingMode: "environment", width: 1920, height: 1080 }
+            }).then(this.handleDeviceReceived.bind(this)).catch(console.log);
+
+        }
+        catch (ex) {
+            console.log(ex)
+        }
+    }
 
     init() {
 
+        this.getDevices();
+        /*
         let video = this.video;
         let ctx = this;
         if (this.state.emulation) {
@@ -335,6 +416,7 @@ export default class Camera extends Component {
 
 
         }
+        */
 
     }
 
