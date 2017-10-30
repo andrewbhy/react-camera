@@ -1,8 +1,9 @@
 {
   "name": "camera-app",
-  "version": "0.1.10",
+  "version": "0.1.10a",
   "private": true,
   "dependencies": {
+    "image-capture": "^0.3.5",
     "lodash": "^4.17.4",
     "material-ui": "^0.19.4",
     "react": "^16.0.0",

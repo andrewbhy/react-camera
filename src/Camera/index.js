@@ -1,5 +1,5 @@
 import throttle from "lodash/throttle"
-
+import {ImageCapture} from "image-capture"
 import React, { Component } from 'react'
 import Slider from 'material-ui/Slider';
 
@@ -343,9 +343,17 @@ export default class Camera extends Component {
                     console.log("focus supportd")
                 }
 
-                if(ImageCapture){
+                if (typeof ImageCapture !== 'undefined'){
+                    
                     console.log("ImageCapture supported")
-                    let imageCapture = new ImageCapture(videoTracks)
+                    let imageCapture = new ImageCapture(videoTracks[0])
+
+                    let photoCapabilities = imageCapture.getPhotoCapabilities().then(c =>{
+
+                        console.dir(c)
+                        
+                    })
+                    
                 }
             }
 
