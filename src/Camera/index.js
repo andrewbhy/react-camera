@@ -74,7 +74,7 @@ export default class Camera extends Component {
         }
 
     }
-    componentWillUpdate() {
+    componentWillMount() {
         this.getDeviceList()
 
     }

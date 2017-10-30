@@ -55,9 +55,11 @@ class App extends Component {
       <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}>
       <div className="App">
         <h1>react-camera</h1> 
-        v {version}
+        <div>v {version}</div>
+        <div>
+        <a href="https://github.com/andrewbhy/react-camera">https://github.com/andrewbhy/react-camera </a></div>
         <div style={{display:"flex", justifyContent:"center"}}>
-          <Camera onCapture={onCapture}  emulation={false} scale={2} maxScale={5} style={{width:this.state.width - 50,height:this.state.height,marginTop:20}} emulation={false} emulationSrc={"SampleVideo_1280x720_1mb.mp4" }/>
+          <Camera onCapture={onCapture}  emulation={false} scale={2} maxScale={5} style={{width:this.state.width - 50,height:this.state.height,marginTop:20}} emulationSrc={"SampleVideo_1280x720_1mb.mp4" }/>
         </div>
         <div>
             <strong>click on the video to "capture" a screenshot</strong>
