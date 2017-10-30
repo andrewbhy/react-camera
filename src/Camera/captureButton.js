@@ -21,7 +21,7 @@ export default class CaptureButton extends Component {
         return (
             <a style={defaultStyle} onClick={this.handleClick} >
                 <svg height="60" width="60">
-                    <circle cx="30" cy="30" r="30" stroke="none" stroke-width="3" fill="white" />
+                    <circle cx="30" cy="30" r="30" stroke="none" strokeWidth="3" fill="white" />
                 </svg>
             </a>
         )

@@ -315,22 +315,42 @@ export default class Camera extends Component {
                         }
                     }
                     ctx.getUserMedia(constraints)
-
                 })
-                
             }
         }
     }
 
     
 
-    handleStreamReceived(stream) {
+    handleStreamReceived(constraints,stream) {
         let videoTracks = null;
         let video = this.video;
         let ctx = this;
 
         if(stream && stream.getVideoTracks){
             videoTracks = stream.getVideoTracks();
+
+            if(videoTracks.length > 0 && videoTracks[0].getCapabilities ){
+
+                let capabilities = videoTracks[0].getCapabilities();
+
+                
+
+                if(capabilities.zoom){
+                    console.log("hardware zoom supportd")
+                }
+                if (capabilities.focusDistance){
+                    console.log("focus supportd")
+                }
+
+                if(ImageCapture){
+                    console.log("ImageCapture supported")
+                    let imageCapture = new ImageCapture(videoTracks)
+                }
+            }
+
+           
+
         }
         
         if( this.state.emulation ){
@@ -458,7 +478,7 @@ export default class Camera extends Component {
                 ctx = this
             }
             //manually set the context to wherever the function belongs to, otherwise will get illegal invcation error
-            return getUserMedia.call(ctx, constraints).then(this.handleStreamReceived.bind(this)).catch(this._onError);
+            return getUserMedia.call(ctx, constraints).then(this.handleStreamReceived.bind(this,constraints)).catch(this._onError);
 
         }
         catch (ex) {
