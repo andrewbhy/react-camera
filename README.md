@@ -58,6 +58,10 @@ Also, component will automatically fallback to emulation mode when initializatio
 <Camera emulation={true}>
 ```
 
+## emulationSrc : ?string
+
+path to the video file to be played in emulation mode
+
 ## onCapture : ?Function
 
 ```javascript
