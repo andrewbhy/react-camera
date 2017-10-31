@@ -487,6 +487,10 @@ export default class Camera extends Component {
 
     getUserMedia(constraints) {
 
+        let getUserMedia = null;
+        let ctx = null;
+
+
         if (!constraints) {
             constraints = {
                 audio: false,
@@ -495,9 +499,8 @@ export default class Camera extends Component {
         }
 
         try {
-            let getUserMedia = null;
-            let ctx = null;
-
+        
+            debugger
 
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 getUserMedia = navigator.mediaDevices.getUserMedia;
