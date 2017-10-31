@@ -91,7 +91,7 @@ export default class Camera extends Component {
         let sliderHeight = (this.state.height - 80)
 
         return (
-            <div style={Object.assign({}, { position: "relative" }, this.props.style, { width: this.state.width + 200, height: this.state.height })} >
+            <div style={Object.assign({}, { position: "relative" }, this.props.style, { width: this.state.width + cameraControlStyle.width, height: this.state.height })} >
 
                 <div style={{ position: "relative", display: "flex" }}>
                     <div className="camera-container" style={cameraStyle}>
@@ -104,7 +104,7 @@ export default class Camera extends Component {
                         </div>
                         <div style={{ position: "relative" }}>
                             {
-                                this.state.showDevices && <Devices devices={this.state.devices} style={{ margin: 20 }} onClick={this.changeDevice} />
+                                this.state.showDevices && <Devices deviceId={this.state.deviceId} devices={this.state.devices} style={{ margin: 20 }} onClick={this.changeDevice} />
                             }
                         </div>
 
@@ -146,7 +146,7 @@ export default class Camera extends Component {
 
     componentWillReceiveProps(props) {
         if (this.video && this.video.videoHeight > 0) {
-            let dimension = this.adjustAspectRatio(this.video.videoWidth, this.video.videoHeight, props.style.width)
+            let dimension = this.adjustAspectRatio(this.video.videoWidth, this.video.videoHeight, props.style.width-cameraControlStyle.width)
             this.setState(dimension)
         }
 
@@ -448,16 +448,19 @@ export default class Camera extends Component {
         if (this.state.emulation) {
             //emulation?
             this.loadEmulationVideo(video)
+            this.setState({deviceId:this.getEmulationDeviceInfo().deviceId})
 
         }
         else if (stream instanceof MediaStream) {
             video.src = null;
             video.srcObject = stream
+            
+            this.setState({ deviceId : constraints.video.deviceId.exact }) //consider more robust solution
         }
         else {
 
             //this should not reach, but just in case..
-            this.setState({ emulation: true })
+            this.setState({ emulation: true,deviceId: this.getEmulationDeviceInfo().deviceId })
             this.loadEmulationVideo(video)
         }
 
@@ -466,7 +469,6 @@ export default class Camera extends Component {
         video.onloadedmetadata =  (e)=> {
             return this.handleVideoMetaDataLoaded(video,e)
         }
-
 
 
 

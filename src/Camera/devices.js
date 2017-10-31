@@ -1,7 +1,8 @@
 
 
 import React, { Component } from 'react'
-
+import className from 'classname'
+import './devices.css'
 
 
 export default class Devices extends Component{
@@ -33,8 +34,9 @@ export default class Devices extends Component{
                     
                     let name = device.label.replace(/\([0-9:a-zA-Z]*\)/,"")
                     let key = device.id || device.deviceId;
-
-                    return <div onClick={ctx.handleClick.bind(this,key,ctx)} key={key}className={device.facingMode}style={{color:'white' ,fontSize:10,margin:10,padding:10,border:"solid" ,borderRadius:10}}>{name||"unknown device"}</div>;
+                    let selected = ( key == ctx.props.deviceId )
+                  
+                    return <div onClick={ctx.handleClick.bind(this,key,ctx)} key={key}className={className ('device-item',{ 'selected' : selected }) }>{name||"unknown device"}</div>;
                 })
             }
             </div>
