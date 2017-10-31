@@ -1,6 +1,6 @@
 {
   "name": "camera-app",
-  "version": "0.1.10a",
+  "version": "0.1.10b",
   "private": true,
   "dependencies": {
     "lodash": "^4.17.4",
