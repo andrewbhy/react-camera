@@ -8,8 +8,6 @@ export default class Devices extends Component{
 
     constructor(props){
         super(props)
-        
-       
     }
 
     componentWillReceiveProps(props){
