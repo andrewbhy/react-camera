@@ -409,10 +409,11 @@ export default class Camera extends Component {
         }
 
         video.onloadedmetadata = (e) => {
-            video.play();
-            ctx.setCanvasDimension(video.videoWidth, video.videoHeight)
-            let dimension = this.adjustAspectRatio(video.videoWidth, video.videoHeight,ctx.state.width)
-            ctx.setState(dimension)
+            video.play().then(()=>{
+                ctx.setCanvasDimension(video.videoWidth, video.videoHeight)
+                let dimension = ctx.adjustAspectRatio(video.videoWidth, video.videoHeight,ctx.state.width)
+                ctx.setState(dimension)
+            }).catch(ctx._onError) 
         }
         video.onabort = (e) => {
             console.log("video aborted", e)
