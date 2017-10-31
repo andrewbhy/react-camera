@@ -1,4 +1,4 @@
-import throttle from "lodash/throttle"
+import {throttle} from "lodash"
 import {ImageCapture} from "../ImageCapture"
 import React, { Component } from 'react'
 import Slider from 'material-ui/Slider';
@@ -61,16 +61,6 @@ export default class Camera extends Component {
     }
 
 
-    componentWillMount() {
-
-        // try {
-        //     navigator.mediaDevices.enumerateDevices()
-        //         .then(this.deviceReceived.bind(this)).catch(console.log);
-        // }
-        // catch (ex) {
-        //     console.log(ex)
-        // }
-    }
 
     componentDidMount() {
         this.init();
@@ -261,35 +251,48 @@ export default class Camera extends Component {
 
 
     getDeviceList(){
+
+        let ctx = this
         
         let deviceList = null;
-
         let filter = (item) => { return ( item.kind == "video" || item.kind =="videoinput");};
+        let sort = (a,b) => { 
 
-        if ( navigator.mediaDevices.enumerateDevices){
+            let labelA = (a.label || "").toLowerCase()
+            let labelB = (b.label || "").toLowerCase()
 
-            navigator.mediaDevices.enumerateDevices().then( sourceList => {
-                
-                deviceList = sourceList || []
-                
-                deviceList = deviceList.filter( filter )
-                                
-                this.deviceReceived(deviceList) //update device list
+            let isARearCamera = ( labelA.indexOf("rear") >= 0 )
+            let isBRearCamera = ( labelB.indexOf("rear") >= 0 )
 
+            let returnVal = 0
 
-            })
+            if( isARearCamera == isBRearCamera ){
+                returnVal = ( labelA < labelB ) ? -1 : ( (labelA > labelB) ? 1 : 0 )
+            }
+            else if ( isARearCamera && !isBRearCamera ) {
+                returnVal = 1
+            }
+            else {
+                returnVal = -1
+            }
+            return returnVal
         }
-        else if(MediaStreamTrack && MediaStreamTrack.getSources ) {
-
-            
-            MediaStreamTrack.getSources( (sourceList) => {
-                
-                deviceList = sourceList || []
-
-                deviceList = deviceList.filter( filter )
-                
-                this.deviceReceived(deviceList) //update device list
-            })
+        let handleDeviceReceived = (sourceList) => {
+            deviceList = sourceList || []
+            deviceList = deviceList.filter( filter )
+            deviceList = deviceList.sort( sort )
+            ctx.deviceReceived(deviceList) //update device list
+        }
+        try{
+            if (navigator.mediaDevices.enumerateDevices){
+                navigator.mediaDevices.enumerateDevices().then( handleDeviceReceived ).catch(ctx._onError)
+            }
+            else if(MediaStreamTrack && MediaStreamTrack.getSources ) {
+                MediaStreamTrack.getSources( handleDeviceReceived, ctx._onError );
+            }
+        }
+        catch(err){
+            this._onError(err)
         }
         
        
@@ -334,8 +337,6 @@ export default class Camera extends Component {
                 console.log(videoTracks[0].label)
                 let capabilities = videoTracks[0].getCapabilities();
 
-                
-
                 if(capabilities.zoom){
                     console.log("hardware zoom supportd")
                 }
@@ -344,22 +345,23 @@ export default class Camera extends Component {
                 }
 
                 if (typeof ImageCapture !== 'undefined'){
-                    
-                    console.log("ImageCapture supported")
-                    let imageCapture = new ImageCapture(videoTracks[0])
+                    try{
+                        //experimental 
+                        console.log("ImageCapture supported")
+                        let imageCapture = new ImageCapture(videoTracks[0])
 
-                    let photoCapabilities = imageCapture.getPhotoCapabilities().then(c =>{
+                        let photoCapabilities = imageCapture.getPhotoCapabilities().then(c =>{
+                            console.dir(c)
+                        })
+                        if(navigator.mediaDevices.getSupportedConstraints){
+                            debugger
+                            let c = navigator.mediaDevices.getSupportedConstraints();
+                            console.dir(c)
+                        }
 
-                        console.dir(c)
-                        
-                    })
+                    }
+                    catch(err){
 
-                    if(navigator.mediaDevices.getSupportedConstraints){
-                        debugger
-                    
-                       let c = navigator.mediaDevices.getSupportedConstraints();
-
-                       console.dir(c)
                     }
                     
                 }
@@ -460,6 +462,11 @@ export default class Camera extends Component {
             audio: false,
             video: { width: 1920, height: 1080, acingMode: "environment" },
   
+        }
+
+        if ( this.state.devices.length > 0 ){
+
+            constraints.video = Object.assign( {} , constraints.video , {optional: [{sourceId: this.state.devices[0].deviceId}] }  )
         }
        
         this.getUserMedia(constraints)
