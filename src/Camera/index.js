@@ -1,4 +1,4 @@
-import { throttle } from "lodash"
+import { throttle, merge  } from "lodash"
 import { ImageCapture } from "../ImageCapture"
 import React, { Component } from 'react'
 import Slider from 'material-ui/Slider';
@@ -17,7 +17,14 @@ const cameraControlStyle = {
     width: 150,
     backgroundColor: "black"
 }
+const defaultCameraConstraint = {
 
+    audio : false,
+    video : {
+        width : { min:680,ideal:1920},
+        height : { min:480,ideal : 1080 }
+    }
+}
 
 
 
@@ -319,12 +326,13 @@ export default class Camera extends Component {
             }
             else {
                 this.setState({ emulation: false }, () => {
-                    let constraints = {
-                        audio: false,
-                        video: {
-                            optional: [{ sourceId }]
-                        }
-                    }
+                  
+
+                    let constraints = merge({},defaultCameraConstraint, { video : { deviceId : { exact : sourceId}} });
+                    
+                    
+
+
                     ctx.getUserMedia(constraints)
                 })
             }
@@ -367,11 +375,7 @@ export default class Camera extends Component {
     }
 
     loadEmulationVideo(video) {
-        //stop existing videotracks
-        if (video.srcObject) {
-            video.srcObject.getVideoTracks().forEach(track => track.stop())
-            video.srcObject = null;
-        }
+      
 
         video.src = this.state.emulationSrc;
         video.muted = true
@@ -425,6 +429,11 @@ export default class Camera extends Component {
         let videoTracks = null;
         let video = this.video;
         let ctx = this;
+        //stop existing videotracks
+        if (video.srcObject) {
+            video.srcObject.getVideoTracks().forEach(track => track.stop())
+            video.srcObject = null;
+        }
 
         if (stream && stream.getVideoTracks) {
             videoTracks = stream.getVideoTracks();
@@ -454,7 +463,9 @@ export default class Camera extends Component {
 
         this.bindVideoEventHandlers(video)
         this.bindStreamEventHandlers(stream)
-        video.onloadedmetadata = this.handleVideoMetaDataLoaded.call(this, video)
+        video.onloadedmetadata =  (e)=> {
+            return this.handleVideoMetaDataLoaded(video,e)
+        }
 
 
 
@@ -472,15 +483,11 @@ export default class Camera extends Component {
 
     loadDefaultDevice(deviceList) {
 
-        let constraints = {
-            audio: false,
-            video: { width: 1920, height: 1080, facingMode: "environment" },
+        let constraints = merge({},defaultCameraConstraint, { video : deviceList && deviceList.length > 0 ? { deviceId :  { exact : deviceList[0].deviceId } } :{} });
 
-        }
-
-        if (deviceList && deviceList.length > 0) {
-            constraints.video =  { optional : [ { sourceId: deviceList[0].deviceId }] }
-        }
+        // if (deviceList && deviceList.length > 0) {
+        //     constraints.video =  Object.assign( {},constraints.video, { optional : [ { sourceId: deviceList[0].deviceId },{minAspectRatio:1.6}] }  )
+        // }
 
         this.getUserMedia(constraints)
     }
@@ -500,8 +507,6 @@ export default class Camera extends Component {
                 }
             }
 
-
-            debugger
 
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 getUserMedia = navigator.mediaDevices.getUserMedia;
