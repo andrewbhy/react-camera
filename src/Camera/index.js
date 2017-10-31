@@ -331,7 +331,7 @@ export default class Camera extends Component {
             videoTracks = stream.getVideoTracks();
 
             if(videoTracks.length > 0 && videoTracks[0].getCapabilities ){
-
+                console.log(videoTracks[0].label)
                 let capabilities = videoTracks[0].getCapabilities();
 
                 
@@ -353,8 +353,19 @@ export default class Camera extends Component {
                         console.dir(c)
                         
                     })
+
+                    if(navigator.mediaDevices.getSupportedConstraints){
+                        debugger
+                    
+                       let c = navigator.mediaDevices.getSupportedConstraints();
+
+                       console.dir(c)
+                    }
                     
                 }
+
+
+
             }
 
            
