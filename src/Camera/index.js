@@ -1,5 +1,5 @@
-import {throttle} from "lodash"
-import {ImageCapture} from "../ImageCapture"
+import { throttle } from "lodash"
+import { ImageCapture } from "../ImageCapture"
 import React, { Component } from 'react'
 import Slider from 'material-ui/Slider';
 
@@ -14,8 +14,8 @@ const MIN_SCALE = 1
 const ZOOM_INCREMENT = .25
 
 const cameraControlStyle = {
-    width : 150,
-    backgroundColor:"black"
+    width: 150,
+    backgroundColor: "black"
 }
 
 
@@ -43,7 +43,7 @@ export default class Camera extends Component {
             width: this.props.style.width - cameraControlStyle.width,
             height: this.props.style.height,
             emulation: this.props.emulation,
-            emulationSrc : this.props.emulationSrc,
+            emulationSrc: this.props.emulationSrc,
             isCapturing: false
 
 
@@ -73,7 +73,9 @@ export default class Camera extends Component {
 
     }
     componentWillMount() {
-        this.getDeviceList()
+        this.getDeviceList((deviceList=>{
+            this.setState({ devices: deviceList || [] })
+        }))
 
     }
     render() {
@@ -101,13 +103,13 @@ export default class Camera extends Component {
         return (
             <div style={Object.assign({}, { position: "relative" }, this.props.style, { width: this.state.width + 200, height: this.state.height })} >
 
-                <div style={{position:"relative",display:"flex"}}>
+                <div style={{ position: "relative", display: "flex" }}>
                     <div className="camera-container" style={cameraStyle}>
 
                         <div style={{ display: "flex", justifyContent: "center" }} >
                             <video style={videoStyle}
                                 ref={vid => { this.video = vid }}
-                                
+
                             />
                         </div>
                         <div style={{ position: "relative" }}>
@@ -122,7 +124,7 @@ export default class Camera extends Component {
                                 <Message msg={Math.round(this.state.scale * 100) / 100 + "X"} />
                             </div>
                         </div>
-            
+
 
 
                         <div style={{ position: "absolute", zIndex: 10, pointerEvents: "none" }}>
@@ -131,17 +133,17 @@ export default class Camera extends Component {
 
                     </div>
 
-                    <div style={ Object.assign({},cameraControlStyle,{ position:"relative", display: "flex",height:this.state.height, justifyContent: "flex-end" })} >
-                            <div style={{display:"flex", flexDirection:"column", position:"relative",marginRight:30,justifyContent:"center"}}>
-                                <CaptureButton onClick={this._onCapture}/>
+                    <div style={Object.assign({}, cameraControlStyle, { position: "relative", display: "flex", height: this.state.height, justifyContent: "flex-end" })} >
+                        <div style={{ display: "flex", flexDirection: "column", position: "relative", marginRight: 30, justifyContent: "center" }}>
+                            <CaptureButton onClick={this._onCapture} />
+                        </div>
+                        <div style={{ display: "flex", height: "100%", position: "relative", justifyContent: "flex-end" }}>
+                            <div className="zoom-control" style={{ width: 20, position: "relative", display: "flex", justifyContent: "center", flexDirection: "column", marginRight: 5 }}>
+                                <button onClick={this.zoomIn}>+</button>
+                                <Slider style={{ height: sliderHeight, marginTop: 10, marginBottom: 10, display: "flex", justifyContent: "center" }} sliderStyle={{ marginTop: 0, marginBottom: 0 }} axis="y" value={sliderValue} defaultValue={sliderValue} onChange={this.zoomChange} />
+                                <button onClick={this.zoomOut}>-</button>
                             </div>
-                            <div style={{ display:"flex", height:"100%",position:"relative", justifyContent: "flex-end" }}>
-                                <div className="zoom-control" style={{ width:20,position: "relative", display: "flex", justifyContent: "center", flexDirection: "column", marginRight: 5 }}>
-                                    <button onClick={this.zoomIn}>+</button>
-                                    <Slider style={{ height: sliderHeight, marginTop: 10, marginBottom: 10, display: "flex", justifyContent: "center" }} sliderStyle={{ marginTop: 0, marginBottom: 0 }} axis="y" value={sliderValue} defaultValue={sliderValue} onChange={this.zoomChange} />
-                                    <button onClick={this.zoomOut}>-</button>
-                                </div>
-                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -184,11 +186,11 @@ export default class Camera extends Component {
         })
     }
 
-    _onError(err){
-        if(this.props.onError){
+    _onError(err) {
+        if (this.props.onError) {
             this.props.onError(err)
         }
-        else{
+        else {
             console.error(err)
         }
     }
@@ -250,26 +252,26 @@ export default class Camera extends Component {
     }
 
 
-    getDeviceList(){
+    getDeviceList(callback) {
 
         let ctx = this
-        
+
         let deviceList = null;
-        let filter = (item) => { return ( item.kind == "video" || item.kind =="videoinput");};
-        let sort = (a,b) => { 
+        let filter = (item) => { return (item.kind == "video" || item.kind == "videoinput"); };
+        let sort = (a, b) => {
 
             let labelA = (a.label || "").toLowerCase()
             let labelB = (b.label || "").toLowerCase()
 
-            let isARearCamera = ( labelA.indexOf("rear") >= 0 )
-            let isBRearCamera = ( labelB.indexOf("rear") >= 0 )
+            let isARearCamera = (labelA.indexOf("rear") >= 0)
+            let isBRearCamera = (labelB.indexOf("rear") >= 0)
 
             let returnVal = 0
 
-            if( isARearCamera == isBRearCamera ){
-                returnVal = ( labelA < labelB ) ? -1 : ( (labelA > labelB) ? 1 : 0 )
+            if (isARearCamera == isBRearCamera) {
+                returnVal = (labelA < labelB) ? -1 : ((labelA > labelB) ? 1 : 0)
             }
-            else if ( isARearCamera && !isBRearCamera ) {
+            else if (isARearCamera && !isBRearCamera) {
                 returnVal = 1
             }
             else {
@@ -277,44 +279,56 @@ export default class Camera extends Component {
             }
             return returnVal
         }
+
+        
         let handleDeviceReceived = (sourceList) => {
             deviceList = sourceList || []
-            deviceList = deviceList.filter( filter )
-            deviceList = deviceList.sort( sort )
-            ctx.deviceReceived(deviceList) //update device list
-        }
-        try{
-            if (navigator.mediaDevices.enumerateDevices){
-                navigator.mediaDevices.enumerateDevices().then( handleDeviceReceived ).catch(ctx._onError)
+            deviceList = deviceList.filter(filter)
+            deviceList = deviceList.sort(sort)
+
+            if (!deviceList.find(item => { item.kind == "emulation" })) {
+                deviceList.push(this.getEmulationDeviceInfo())
             }
-            else if(MediaStreamTrack && MediaStreamTrack.getSources ) {
-                MediaStreamTrack.getSources( handleDeviceReceived, ctx._onError );
+
+            if( callback ){
+                callback(deviceList)
+            }
+
+           
+        }
+        try {
+            if (navigator.mediaDevices.enumerateDevices) {
+                navigator.mediaDevices.enumerateDevices().then(handleDeviceReceived).catch(ctx._onError)
+            }
+            else if (MediaStreamTrack && MediaStreamTrack.getSources) {
+                MediaStreamTrack.getSources(handleDeviceReceived, ctx._onError);
             }
         }
-        catch(err){
+        catch (err) {
             this._onError(err)
         }
-        
-       
+
+
     }
+
     changeDevice(sourceId) {
-        
+
         let ctx = this;
-         //override device
-        if(sourceId){
-            
-            if( sourceId == 1 ){
+        //override device
+        if (sourceId) {
+
+            if (sourceId == 1) {
                 //emulation
-                this.setState({emulation:true},()=>{
+                this.setState({ emulation: true }, () => {
                     ctx.getUserMedia()
                 })
             }
-            else{
-                this.setState({emulation:false},()=>{
+            else {
+                this.setState({ emulation: false }, () => {
                     let constraints = {
                         audio: false,
-                        video : {
-                            optional: [{sourceId}]
+                        video: {
+                            optional: [{ sourceId }]
                         }
                     }
                     ctx.getUserMedia(constraints)
@@ -323,67 +337,67 @@ export default class Camera extends Component {
         }
     }
 
-    
 
-    handleStreamReceived(constraints,stream) {
+
+    handleStreamReceived(constraints, stream) {
         let videoTracks = null;
         let video = this.video;
         let ctx = this;
 
-        if(stream && stream.getVideoTracks){
+        if (stream && stream.getVideoTracks) {
             videoTracks = stream.getVideoTracks();
 
-            if(videoTracks.length > 0 && videoTracks[0].getCapabilities ){
+            if (videoTracks.length > 0 && videoTracks[0].getCapabilities) {
                 console.log(videoTracks[0].label)
                 let capabilities = videoTracks[0].getCapabilities();
 
-                if(capabilities.zoom){
+                if (capabilities.zoom) {
                     console.log("hardware zoom supportd")
                 }
-                if (capabilities.focusDistance){
+                if (capabilities.focusDistance) {
                     console.log("focus supportd")
                 }
 
-                if (typeof ImageCapture !== 'undefined'){
-                    try{
+                if (typeof ImageCapture !== 'undefined') {
+                    try {
                         //experimental 
                         console.log("ImageCapture supported")
                         let imageCapture = new ImageCapture(videoTracks[0])
 
-                        let photoCapabilities = imageCapture.getPhotoCapabilities().then(c =>{
+                        let photoCapabilities = imageCapture.getPhotoCapabilities().then(c => {
                             console.dir(c)
                         })
-                        if(navigator.mediaDevices.getSupportedConstraints){
+                        if (navigator.mediaDevices.getSupportedConstraints) {
                             debugger
                             let c = navigator.mediaDevices.getSupportedConstraints();
                             console.dir(c)
                         }
 
                     }
-                    catch(err){
+                    catch (err) {
 
                     }
-                    
+
                 }
 
 
 
             }
 
-           
+
 
         }
 
-        
-        if( this.state.emulation ){
+
+        if (this.state.emulation) {
             //emulation?
-           
+
             //stop existing videotracks
-            if(video.srcObject){
-                video.srcObject.getVideoTracks().forEach(track=>track.stop())
+            if (video.srcObject) {
+                video.srcObject.getVideoTracks().forEach(track => track.stop())
                 video.srcObject = null;
             }
-           
+
             video.src = this.state.emulationSrc;
             video.muted = true
             if (typeof video.loop == 'boolean') {
@@ -391,14 +405,14 @@ export default class Camera extends Component {
                 video.loop = true;
             }
         }
-        else if( stream instanceof MediaStream){
+        else if (stream instanceof MediaStream) {
             video.src = null;
             video.srcObject = stream
         }
-        else{
+        else {
 
             //this should not reach, but just in case..
-            this.setState({emulation:true})
+            this.setState({ emulation: true })
             //emulation?
             video.srcObject = null;
             video.src = this.state.emulationSrc;
@@ -410,12 +424,12 @@ export default class Camera extends Component {
         }
 
         video.onloadedmetadata = (e) => {
-          
-            video.play().then(()=>{
+
+            video.play().then(() => {
                 ctx.setCanvasDimension(video.videoWidth, video.videoHeight)
-                let dimension = ctx.adjustAspectRatio(video.videoWidth, video.videoHeight,ctx.state.width)
+                let dimension = ctx.adjustAspectRatio(video.videoWidth, video.videoHeight, ctx.state.width)
                 ctx.setState(dimension)
-            }).catch(ctx._onError) 
+            }).catch(ctx._onError)
         }
         video.onabort = (e) => {
             console.log("video aborted", e)
@@ -424,61 +438,57 @@ export default class Camera extends Component {
             console.log("video actived", e)
         }
         video.onclose = e => {
-            console.log("video closed",e)
+            console.log("video closed", e)
         }
         video.onerror = (e) => {
             this._onError(e)
         }
 
-        if(stream){
+        if (stream) {
             stream.oninactive = e => {
-                console.log('Stream inactive',e);
+                console.log('Stream inactive', e);
             };
-            stream.onactive = (e)=> {
+            stream.onactive = (e) => {
                 console.log("Stream active", e)
             }
             stream.oneded = e => {
-                console.log("Stream ended",e)
+                console.log("Stream ended", e)
             }
         }
-     
 
-      
+
+
     }
 
 
-    deviceReceived(devices) {
 
-        let deviceList = devices || []
 
-        if(!deviceList.find(item=>{item.kind=="emulation"}) ) {
-            deviceList.push(this.getEmulationDeviceInfo())
-        }
 
-        this.setState({ devices: deviceList })
-    }
-
-    
     loadDefaultDevice() {
 
         let constraints = {
             audio: false,
             video: { width: 1920, height: 1080, facingMode: "environment" },
-  
+
         }
 
-        if ( this.state.devices.length > 0 ){
+        let ctx = this;
 
-            constraints.video = Object.assign( {} , constraints.video , {optional: [{sourceId: this.state.devices[0].deviceId}] }  )
-        }
-       
-        this.getUserMedia(constraints)
-      
+        this.getDeviceList(deviceList=>{
+            debugger
+            constraints.video = Object.assign({}, constraints.video, {   sourceId: deviceList[0].deviceId  })
+
+            ctx.getUserMedia(constraints)
+        })
+
+    
+
+
     }
 
-    getUserMedia(constraints){
+    getUserMedia(constraints) {
 
-        if (!constraints){
+        if (!constraints) {
             constraints = {
                 audio: false,
                 video: { facingMode: "environment", width: 1920, height: 1080 }
@@ -489,7 +499,7 @@ export default class Camera extends Component {
             let getUserMedia = null;
             let ctx = null;
 
-            
+
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 getUserMedia = navigator.mediaDevices.getUserMedia;
                 ctx = navigator.mediaDevices;
@@ -507,7 +517,7 @@ export default class Camera extends Component {
                 ctx = this
             }
             //manually set the context to wherever the function belongs to, otherwise will get illegal invcation error
-            return getUserMedia.call(ctx, constraints).then(this.handleStreamReceived.bind(this,constraints)).catch(this._onError);
+            return getUserMedia.call(ctx, constraints).then(this.handleStreamReceived.bind(this, constraints)).catch(this._onError);
 
         }
         catch (ex) {
@@ -515,21 +525,21 @@ export default class Camera extends Component {
         }
     }
 
-    getEmulationDeviceInfo (){
+    getEmulationDeviceInfo() {
         return {
-            id : 1,
+            id: 1,
             deviceId: 1,
             label: "emulation",
-            kind : "emulation",
-            emulation : true,
-            selected : false
+            kind: "emulation",
+            emulation: true,
+            selected: false
         }
     }
 
     getUserMediaEmulation() {
 
-        return new Promise( (resolve,reject)=>{
-            this.setState({emulation:true},()=>{
+        return new Promise((resolve, reject) => {
+            this.setState({ emulation: true }, () => {
 
                 resolve(false);//no MediaStream
             })
@@ -548,7 +558,7 @@ Camera.defaultProps = {
     scale: 1,
 
     emulation: false,
-    emulationSrc : null,
+    emulationSrc: null,
     showDevices: true,
 
     maxScale: MAX_SCALE,
@@ -559,5 +569,5 @@ Camera.defaultProps = {
     },
 
     onCapture: null,
-    onError : null
+    onError: null
 };
