@@ -1,6 +1,6 @@
 {
   "name": "camera-app",
-  "version": "0.1.18",
+  "version": "0.1.18a",
   "private": true,
   "dependencies": {
     "classname": "^0.0.0",
