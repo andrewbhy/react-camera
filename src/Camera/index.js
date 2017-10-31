@@ -373,15 +373,17 @@ export default class Camera extends Component {
            
 
         }
+
+        //stop existing videotracks
+        if(video.srcObject){
+            video.srcObject.getVideoTracks().forEach(track=>track.stop())
+            video.srcObject = null;
+        }
         
         if( this.state.emulation ){
             //emulation?
 
-            if(video.srcObject){
-
-                video.srcObject.getVideoTracks().forEach(track=>track.stop())
-                video.srcObject = null;
-            }
+           
            
             video.src = this.state.emulationSrc;
             video.muted = true
@@ -463,7 +465,7 @@ export default class Camera extends Component {
 
         let constraints = {
             audio: false,
-            video: { width: 1920, height: 1080, acingMode: "environment" },
+            video: { width: 1920, height: 1080, facingMode: "environment" },
   
         }
 
