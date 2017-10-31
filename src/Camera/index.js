@@ -479,7 +479,7 @@ export default class Camera extends Component {
         }
 
         if (deviceList && deviceList.length > 0) {
-            constraints.video = Object.assign({}, constraints.video, { sourceId: deviceList[0].deviceId })
+            constraints.video =  { optional : [ { sourceId: deviceList[0].deviceId }] }
         }
 
         this.getUserMedia(constraints)
@@ -487,19 +487,20 @@ export default class Camera extends Component {
 
     getUserMedia(constraints) {
 
-        let getUserMedia;
-        let ctx;
-
-
-        if (!constraints) {
-            constraints = {
-                audio: false,
-                video: { facingMode: "environment", width: 1920, height: 1080 }
-            }
-        }
 
         try {
-        
+            let getUserMedia;
+            let ctx;
+
+
+            if (!constraints) {
+                constraints = {
+                    audio: false,
+                    video: { facingMode: "environment", width: 1920, height: 1080 }
+                }
+            }
+
+
             debugger
 
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
