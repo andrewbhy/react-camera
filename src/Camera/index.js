@@ -409,6 +409,8 @@ export default class Camera extends Component {
         }
 
         video.onloadedmetadata = (e) => {
+            video.muted = true; //iOS safari will not allow video to autostart when there is audio
+
             video.play().then(()=>{
                 ctx.setCanvasDimension(video.videoWidth, video.videoHeight)
                 let dimension = ctx.adjustAspectRatio(video.videoWidth, video.videoHeight,ctx.state.width)
