@@ -461,7 +461,7 @@ export default class Camera extends Component {
 
         let constraints = {
             audio: false,
-            video: { width: 1920, height: 1080, acingMode: "environment" },
+            video: { width: 1920, height: 1080, facingMode: "environment" },
   
         }
        
