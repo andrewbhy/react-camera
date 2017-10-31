@@ -371,15 +371,17 @@ export default class Camera extends Component {
            
 
         }
+
+        //stop existing videotracks
+        if(video.srcObject){
+            video.srcObject.getVideoTracks().forEach(track=>track.stop())
+            video.srcObject = null;
+        }
         
         if( this.state.emulation ){
             //emulation?
 
-            if(video.srcObject){
-
-                video.srcObject.getVideoTracks().forEach(track=>track.stop())
-                video.srcObject = null;
-            }
+           
            
             video.src = this.state.emulationSrc;
             video.muted = true
