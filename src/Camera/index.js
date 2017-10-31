@@ -1,5 +1,5 @@
 import throttle from "lodash/throttle"
-import {ImageCapture} from "image-capture"
+import {ImageCapture} from "../ImageCapture"
 import React, { Component } from 'react'
 import Slider from 'material-ui/Slider';
 
