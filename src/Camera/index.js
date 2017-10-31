@@ -97,7 +97,7 @@ export default class Camera extends Component {
                     <div className="camera-container" style={cameraStyle}>
 
                         <div style={{ display: "flex", justifyContent: "center" }} >
-                            <video style={videoStyle}
+                            <video playsinline webkit-playsinline style={videoStyle}
                                 ref={vid => { this.video = vid }}
 
                             />
