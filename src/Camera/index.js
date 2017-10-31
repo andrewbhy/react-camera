@@ -265,10 +265,10 @@ export default class Camera extends Component {
                 returnVal = (labelA < labelB) ? -1 : ((labelA > labelB) ? 1 : 0)
             }
             else if (isARearCamera && !isBRearCamera) {
-                returnVal = 1
+                returnVal = -1
             }
             else {
-                returnVal = -1
+                returnVal = 1
             }
             return returnVal
         }
