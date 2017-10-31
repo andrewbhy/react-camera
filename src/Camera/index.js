@@ -57,7 +57,7 @@ export default class Camera extends Component {
         this.zoomOut = this.zoomOut.bind(this)
         this.zoomChange = this.zoomChange.bind(this)
 
-
+        this.getUserMedia = this.getUserMedia.bind(this)
     }
 
 
@@ -487,8 +487,8 @@ export default class Camera extends Component {
 
     getUserMedia(constraints) {
 
-        let getUserMedia = null;
-        let ctx = null;
+        let getUserMedia;
+        let ctx;
 
 
         if (!constraints) {
