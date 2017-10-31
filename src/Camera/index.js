@@ -97,7 +97,7 @@ export default class Camera extends Component {
                     <div className="camera-container" style={cameraStyle}>
 
                         <div style={{ display: "flex", justifyContent: "center" }} >
-                            <video playsinline webkit-playsinline style={videoStyle}
+                            <video autoplay playsinline webkit-playsinline style={videoStyle}
                                 ref={vid => { this.video = vid }}
 
                             />
@@ -386,10 +386,14 @@ export default class Camera extends Component {
     }
     handleVideoMetaDataLoaded(video, e) {
         let ctx = this
+
+        let dimension = this.adjustAspectRatio(video.videoWidth, video.videoHeight, this.state.width)
+        this.setCanvasDimension(video.videoWidth, video.videoHeight)
+        this.setState(dimension)
+
+
         video.play().then(() => {
-            ctx.setCanvasDimension(video.videoWidth, video.videoHeight)
-            let dimension = ctx.adjustAspectRatio(video.videoWidth, video.videoHeight, ctx.state.width)
-            ctx.setState(dimension)
+           
         }).catch(ctx._onError)
     }
 
