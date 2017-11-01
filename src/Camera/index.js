@@ -337,9 +337,6 @@ export default class Camera extends Component {
                   
 
                     let constraints = merge({},defaultCameraConstraint, { video : { deviceId : { exact : sourceId}} });
-                    
-                    
-
 
                     ctx.getUserMedia(constraints)
                 })
@@ -384,13 +381,14 @@ export default class Camera extends Component {
 
     loadEmulationVideo(video) {
       
-
-        video.src = this.state.emulationSrc;
         video.muted = true
         if (typeof video.loop == 'boolean') {
             // loop supported
             video.loop = true;
         }
+
+        video.src = this.state.emulationSrc;
+       
     }
     handleVideoMetaDataLoaded(video, e) {
         let ctx = this
