@@ -18,5 +18,7 @@
 
 .msgSpan {
 
-  color:white
+  color:white;
+  text-shadow:  4px 4px 4px black;
+  font-size: 3em;
 }
