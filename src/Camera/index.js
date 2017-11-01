@@ -1,5 +1,6 @@
 import { throttle, merge  } from "lodash"
 import { ImageCapture } from "../ImageCapture"
+import Hammer from 'react-hammerjs'
 import React, { Component } from 'react'
 import Slider from 'material-ui/Slider';
 
@@ -91,13 +92,17 @@ export default class Camera extends Component {
         let sliderHeight = (this.state.height - 80)
 
         return (
-            <div style={Object.assign({}, { position: "relative" }, this.props.style, { width: this.state.width + cameraControlStyle.width, height: this.state.height })} >
-
+           
+            <Hammer onPinchIn={e=> {  }} onPinchOut={e=>{}} onDrag={e=>{}}>
+           <div style={Object.assign({}, { position: "relative" }, this.props.style, { width: this.state.width + cameraControlStyle.width, height: this.state.height })} >
+           
                 <div style={{ position: "relative", display: "flex" }}>
+
+                  
                     <div className="camera-container" style={cameraStyle}>
 
                         <div style={{ display: "flex", justifyContent: "center" }} >
-                            <video autoplay playsinline webkit-playsinline style={videoStyle}
+                            <video autoPlay playsInline style={videoStyle}
                                 ref={vid => { this.video = vid }}
 
                             />
@@ -122,7 +127,7 @@ export default class Camera extends Component {
                         </div>
 
                     </div>
-
+          
                     <div style={Object.assign({}, cameraControlStyle, { position: "relative", display: "flex", height: this.state.height, justifyContent: "flex-end" })} >
                         <div style={{ display: "flex", flexDirection: "column", position: "relative", marginRight: 30, justifyContent: "center" }}>
                             <CaptureButton onClick={this._onCapture} />
@@ -136,8 +141,10 @@ export default class Camera extends Component {
                         </div>
                     </div>
                 </div>
+          
 
             </div>
+            </Hammer>
         )
     }
 
@@ -213,6 +220,7 @@ export default class Camera extends Component {
 
 
     zoomIn() {
+        debugger
         let currentScale = this.state.scale
         let newScale = currentScale + ZOOM_INCREMENT;
         if (newScale > this.props.maxScale) {
@@ -392,9 +400,9 @@ export default class Camera extends Component {
         this.setState(dimension)
 
 
-        video.play().then(() => {
+        // video.play().then(() => {
            
-        }).catch(ctx._onError)
+        // }).catch(ctx._onError)
     }
 
     bindVideoEventHandlers(video) {
